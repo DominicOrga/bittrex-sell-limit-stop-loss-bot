@@ -1,0 +1,1 @@
+{"market": "BTC-XVG", "stop_loss": {"order_type": "LIMIT", "time_in_effect": "GOOD_TIL_CANCELLED", "condition_type": "GREATER_THAN", "quantity": "100", "rate": "0.5"}, "sell_limit": {"order_type": "LIMIT", "time_in_effect": "GOOD_TIL_CANCELLED", "condition_type": "LESS_THAN", "quantity": "100", "rate": "0.25"}}
