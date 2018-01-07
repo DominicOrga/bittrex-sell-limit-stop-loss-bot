@@ -1,12 +1,15 @@
+from bittrex import bittrex
+from datetime import datetime
 import json
 import time
 import os
-from datetime import datetime
-from bittrex import bittrex
 
-BITTREX_API_KEY = "ea45c56b7f0e47a2986a9f9d87e3535a"
-BITTREX_SECRET_KEY = "d4ec07c80c084c2992d3a0ba1fa46a51"
-btx1 = bittrex.Bittrex(BITTREX_API_KEY, BITTREX_SECRET_KEY, api_version = bittrex.API_V1_1)
+with open("key.json", "r") as in_file:
+	keys = json.load(in_file)
+	api_key = keys["api"]
+	secret_key = keys["secret"]
+
+btx1 = bittrex.Bittrex(api_key, secret_key, api_version = bittrex.API_V1_1)
 
 ORDERSTATE_SELL_LIMIT = "ORDERSTATE_SELL_LIMIT"
 ORDERSTATE_STOP_LOSS = "ORDERSTATE_STOP_LOSS"

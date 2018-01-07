@@ -3,6 +3,7 @@ import json
 import time
 import subprocess
 import os
+import shutil
 
 class Brexit(object):
 
@@ -40,7 +41,7 @@ class Brexit(object):
 		result = self.btx1.get_marketsummary(market)
 
 		if result["success"]:
-			print("[Market checking successful]")
+			print("[Market checking successful]")	
 			self.market = market
 			return True
 
@@ -161,9 +162,6 @@ while True:
 a = input("\nPlace stop loss and sell limit orders [Y = Yes, NOT Y = No]: ")
 
 if a in ("Y", "y"):
-
-
-
 	''' Write stop loss and sell limit orders in order.txt file '''
 	order = { "market": brexit.market, "stop_loss": brexit.stop_loss, "sell_limit": brexit.sell_limit }
 	
@@ -174,7 +172,16 @@ if a in ("Y", "y"):
 	open("order_state.json", "w").close()
 
 	sequence = 0
-	p = subprocess.Popen(["python", "subproc.py"])
+
+	if shutil.which("python3"):
+		py_3 = "python3"
+	elif shutil.which("python"):
+		py_3 = "python"
+	else:
+		print("[python3 or python invalid commands]")
+		quit()
+
+	p = subprocess.Popen([py_3, "subproc.py"])	
 
 	''' Check if subprocess is stuck. If stuck, then restart it '''
 	while True:
@@ -185,13 +192,13 @@ if a in ("Y", "y"):
 				try:
 					order_state = json.load(in_file)
 				except:
-					pass
+					pass 
 
 		if order_state:
 			if int(order_state["sequence"]) == sequence:
-				print("[Subprocess restarted due to stucking issue]")
+				print("[Bittrex is unresponsive. Restarting process...]")
 				p.kill()
-				p = subprocess.Popen(["python", "subproc.py"])
+				p = subprocess.Popen([py_3, "subproc.py"])
 
 			sequence = order_state["sequence"]
 
