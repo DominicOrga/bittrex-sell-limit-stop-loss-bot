@@ -12,10 +12,12 @@ class Brexit(object):
 	sell_limit = {}
 
 	btx1 = None
+	btx2 = None
 
 	def __init__(self, api_key, secret_key):
-		''' API_V2_0 buggy. If possible, use API_V1_1. '''
+		''' Use API_V1_1 to get market summary as API_V2_0's equivalent method is buggy '''
 		self.btx1 = bittrex.Bittrex(api_key, secret_key, api_version = bittrex.API_V1_1)
+		self.btx2 = bittrex.Bittrex(api_key, secret_key, api_version = bittrex.API_V2_0)
 
 		self.sell_limit["order_type"] = bittrex.ORDERTYPE_LIMIT		
 		self.sell_limit["time_in_effect"] = bittrex.TIMEINEFFECT_GOOD_TIL_CANCELLED
@@ -49,16 +51,7 @@ class Brexit(object):
 		return False
 
 	def set_stop_loss(self, quantity, rate):
-		test_passed = self.test_order(quantity, rate)
-
-		if test_passed:
-			self.stop_loss["quantity"] = quantity
-			self.stop_loss["rate"] = rate
-
-		return test_passed
-
-	def set_sell_limit(self, quantity, rate):
-		test_passed = self.test_order(quantity, rate)
+		test_passed = self.test_order(quantity, rate, bittrex.CONDITIONTYPE_GREATER_THAN)
 
 		if test_passed:
 			self.sell_limit["quantity"] = quantity
@@ -66,10 +59,19 @@ class Brexit(object):
 
 		return test_passed
 
-	def test_order(self, quantity, rate):
+	def set_sell_limit(self, quantity, rate):
+		test_passed = self.test_order(quantity, rate, bittrex.CONDITIONTYPE_LESS_THAN)
+
+		if test_passed:
+			self.sell_limit["quantity"] = quantity
+			self.sell_limit["rate"] = rate
+
+		return test_passed
+
+	def test_order(self, quantity, rate, condition_type):
 		print("[Testing order...]")
 
-		result = self.btx1.sell_limit(self.market, quantity, rate)
+		result = self.btx2.trade_sell(self.market, bittrex.ORDERTYPE_LIMIT, quantity, rate, bittrex.TIMEINEFFECT_GOOD_TIL_CANCELLED, condition_type)
 
 		if result["success"]:
 			print("[Order test successful]")
@@ -137,24 +139,30 @@ while True:
 	if res:
 		break
 
-'''  Set and test stop loss order '''
-while True:
-	print("\nWARNING: Never place a TEST RATE near the ACTUAL RATE!")
-	quantity = input("Input stop loss order quantity: ")
-	rate = input("Input stop loss order rate: ")
-
-	res = brexit.set_stop_loss(quantity, rate)
-
-	if res:
-		break
-
 ''' Set and test sell limit order '''
 while True:
-	print("\nWARNING: Never place a TEST RATE near the ACTUAL RATE!")
+	print("\nWARNING:")
+	print("(1) Never place a SELL_LIMIT_RATE near the ACTUAL_MARKET_RATE for testing, else the order might actually execute!")
+	print("(2) if the ACTUAL_MARKET_RATE > SELL_LIMIT_RATE, then the order will automatically be executed.")
+
 	quantity = input("Input sell limit order quantity: ")
 	rate = input("Input sell limit order rate: ")
 
 	res = brexit.set_sell_limit(quantity, rate)
+
+	if res:
+		break
+
+'''  Set and test stop loss order '''
+while True:
+	print("\nWARNING:")
+	print("(1) Never place a SELL_LIMIT_RATE near the ACTUAL_MARKET_RATE for testing, else the order might actually execute!")
+	print("(2) if the ACTUAL_MARKET_RATE < STOP_LOSS_RATE, then the order will automatically be executed.")
+
+	quantity = input("Input stop loss order quantity: ")
+	rate = input("Input stop loss order rate: ")
+
+	res = brexit.set_stop_loss(quantity, rate)
 
 	if res:
 		break
