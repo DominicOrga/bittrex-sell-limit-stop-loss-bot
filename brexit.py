@@ -19,14 +19,6 @@ class Brexit(object):
 		self.btx1 = bittrex.Bittrex(api_key, secret_key, api_version = bittrex.API_V1_1)
 		self.btx2 = bittrex.Bittrex(api_key, secret_key, api_version = bittrex.API_V2_0)
 
-		self.sell_limit["order_type"] = bittrex.ORDERTYPE_LIMIT		
-		self.sell_limit["time_in_effect"] = bittrex.TIMEINEFFECT_GOOD_TIL_CANCELLED
-		self.sell_limit["condition_type"] = bittrex.CONDITIONTYPE_LESS_THAN
-
-		self.stop_loss["order_type"] = bittrex.ORDERTYPE_LIMIT
-		self.stop_loss["time_in_effect"] = bittrex.TIMEINEFFECT_GOOD_TIL_CANCELLED
-		self.stop_loss["condition_type"] = bittrex.CONDITIONTYPE_GREATER_THAN
-
 	def check_keys(self):
 		print("[Checking if keys are valid...]")
 		result = self.btx1.buy_limit("USDT-BTC", -999, -999)
@@ -54,8 +46,8 @@ class Brexit(object):
 		test_passed = self.test_order(quantity, rate, bittrex.CONDITIONTYPE_GREATER_THAN)
 
 		if test_passed:
-			self.sell_limit["quantity"] = quantity
-			self.sell_limit["rate"] = rate
+			self.stop_loss["quantity"] = quantity
+			self.stop_loss["rate"] = rate
 
 		return test_passed
 
@@ -76,7 +68,7 @@ class Brexit(object):
 		if result["success"]:
 			print("[Order test successful]")
 
-			result = self.btx1.cancel(result["result"]["uuid"])
+			result = self.btx1.cancel(result["result"]["OrderId"])
 			if not result["success"]:
 				print("[Failed to remove order for {} during test. Please remove it manually.]".format(self.market))
 
@@ -143,7 +135,7 @@ while True:
 while True:
 	print("\nWARNING:")
 	print("(1) Never place a SELL_LIMIT_RATE near the ACTUAL_MARKET_RATE for testing, else the order might actually execute!")
-	print("(2) if the ACTUAL_MARKET_RATE > SELL_LIMIT_RATE, then the order will automatically be executed.")
+	print("(2) If the ACTUAL_MARKET_RATE > SELL_LIMIT_RATE, then the order will automatically be executed.")
 
 	quantity = input("Input sell limit order quantity: ")
 	rate = input("Input sell limit order rate: ")
@@ -157,7 +149,7 @@ while True:
 while True:
 	print("\nWARNING:")
 	print("(1) Never place a SELL_LIMIT_RATE near the ACTUAL_MARKET_RATE for testing, else the order might actually execute!")
-	print("(2) if the ACTUAL_MARKET_RATE < STOP_LOSS_RATE, then the order will automatically be executed.")
+	print("(2) If the ACTUAL_MARKET_RATE < STOP_LOSS_RATE, then the order will automatically be executed.")
 
 	quantity = input("Input stop loss order quantity: ")
 	rate = input("Input stop loss order rate: ")

@@ -1,1 +1,1 @@
-{"sell_limit": {"condition_type": "LESS_THAN", "rate": "0.25", "quantity": "100", "order_type": "LIMIT", "time_in_effect": "GOOD_TIL_CANCELLED"}, "stop_loss": {"condition_type": "GREATER_THAN", "rate": "0.5", "quantity": "100", "order_type": "LIMIT", "time_in_effect": "GOOD_TIL_CANCELLED"}, "market": "BTC-NXT"}
+{"market": "BTC-NXT", "stop_loss": {"quantity": "20", "rate": "0.000025"}, "sell_limit": {"quantity": "20", "rate": "0.5"}}

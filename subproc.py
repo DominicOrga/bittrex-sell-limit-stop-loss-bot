@@ -10,6 +10,7 @@ with open("key.json", "r") as in_file:
 	secret_key = keys["secret"]
 
 btx1 = bittrex.Bittrex(api_key, secret_key, api_version = bittrex.API_V1_1)
+btx2 = bittrex.Bittrex(api_key, secret_key, api_version = bittrex.API_V2_0)
 
 ORDERSTATE_SELL_LIMIT = "ORDERSTATE_SELL_LIMIT"
 ORDERSTATE_STOP_LOSS = "ORDERSTATE_STOP_LOSS"
@@ -43,7 +44,13 @@ while True:
 		
 		''' If order_state.json does not contain any json strings '''
 		if not order_state:
-			result = btx1.sell_limit(order["market"], order["stop_loss"]["quantity"], order["stop_loss"]["rate"])
+			result = btx2.trade_sell(
+				order["market"], 
+				bittrex.ORDERTYPE_LIMIT, 
+				order["stop_loss"]["quantity"], 
+				order["stop_loss"]["rate"], 
+				bittrex.TIMEINEFFECT_GOOD_TIL_CANCELLED, 
+				bittrex.CONDITIONTYPE_LESS_THAN)
 
 			if not result["success"]:
 				print("[" + result["message"] + "]")
@@ -53,7 +60,7 @@ while True:
 
 			order_state = {
 				"sequence": 1,
-				"uuid": result["result"]["uuid"],
+				"OrderId": result["result"]["OrderId"],
 				"state": ORDERSTATE_STOP_LOSS
 			}
 
@@ -62,13 +69,19 @@ while True:
 
 
 		elif order_state["state"] != ORDERSTATE_STOP_LOSS:
-			result = btx1.cancel(order_state["uuid"])
+			result = btx1.cancel(order_state["OrderId"])
 
 			if not result["success"]:
 				print("[" + result["message"] + "]")
 				quit()	
 				
-			result = btx1.sell_limit(order["market"], order["stop_loss"]["quantity"], order["stop_loss"]["rate"])
+			result = btx2.trade_sell(
+				order["market"], 
+				bittrex.ORDERTYPE_LIMIT, 
+				order["stop_loss"]["quantity"], 
+				order["stop_loss"]["rate"], 
+				bittrex.TIMEINEFFECT_GOOD_TIL_CANCELLED, 
+				bittrex.CONDITIONTYPE_LESS_THAN)				
 
 			if not result["success"]:
 				print("[" + result["message"] + "]")
@@ -78,7 +91,7 @@ while True:
 
 			order_state = {
 				"sequence": int(order_state["sequence"]) + 1,
-				"uuid": result["result"]["uuid"],
+				"OrderId": result["result"]["OrderId"],
 				"state": ORDERSTATE_STOP_LOSS
 			}
 
@@ -88,7 +101,7 @@ while True:
 		else:
 			order_state = {
 				"sequence": int(order_state["sequence"]) + 1,
-				"uuid": order_state["uuid"],
+				"OrderId": order_state["OrderId"],
 				"state": order_state["state"]
 			}
 
@@ -99,7 +112,13 @@ while True:
 
 	else:
 		if not order_state:
-			result = btx1.sell_limit(order["market"], order["sell_limit"]["quantity"], order["sell_limit"]["rate"])
+			result = btx2.trade_sell(
+				order["market"], 
+				bittrex.ORDERTYPE_LIMIT, 
+				order["stop_loss"]["quantity"], 
+				order["stop_loss"]["rate"], 
+				bittrex.TIMEINEFFECT_GOOD_TIL_CANCELLED, 
+				bittrex.CONDITIONTYPE_GREATER_THAN)
 
 			if not result["success"]:
 				print("[" + result["message"] + "]")
@@ -109,7 +128,7 @@ while True:
 
 			order_state = {
 				"sequence": 1,
-				"uuid": result["result"]["uuid"],
+				"OrderId": result["result"]["OrderId"],
 				"state": ORDERSTATE_SELL_LIMIT
 			}
 
@@ -117,13 +136,19 @@ while True:
 				json.dump(order_state, out_file)
 
 		elif order_state["state"] != ORDERSTATE_SELL_LIMIT:
-			result = btx1.cancel(order_state["uuid"])
+			result = btx1.cancel(order_state["OrderId"])
 
 			if not result["success"]:
 				print("[" + result["message"] + "]")
 				quit()	
 				
-			result = btx1.sell_limit(order["market"], order["sell_limit"]["quantity"], order["sell_limit"]["rate"])
+			result = btx2.trade_sell(
+				order["market"], 
+				bittrex.ORDERTYPE_LIMIT, 
+				order["stop_loss"]["quantity"], 
+				order["stop_loss"]["rate"], 
+				bittrex.TIMEINEFFECT_GOOD_TIL_CANCELLED, 
+				bittrex.CONDITIONTYPE_GREATER_THAN)
 
 			if not result["success"]:
 				print("[" + result["message"] + "]")
@@ -133,7 +158,7 @@ while True:
 
 			order_state = {
 				"sequence": int(order_state["sequence"]) + 1,
-				"uuid": result["result"]["uuid"],
+				"OrderId": result["result"]["OrderId"],
 				"state": ORDERSTATE_SELL_LIMIT
 			}
 
@@ -143,7 +168,7 @@ while True:
 		else:
 			order_state = {
 				"sequence": int(order_state["sequence"]) + 1,
-				"uuid": order_state["uuid"],
+				"OrderId": order_state["OrderId"],
 				"state": order_state["state"]
 			}
 
